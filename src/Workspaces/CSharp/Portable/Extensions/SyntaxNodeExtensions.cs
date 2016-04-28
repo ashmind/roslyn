@@ -704,6 +704,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Extensions
                 case SyntaxKind.OrAssignmentExpression:
                 case SyntaxKind.LeftShiftAssignmentExpression:
                 case SyntaxKind.RightShiftAssignmentExpression:
+                case SyntaxKind.CoalesceAssignmentExpression:
                     return true;
             }
 

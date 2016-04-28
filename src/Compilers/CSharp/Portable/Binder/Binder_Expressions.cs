@@ -526,6 +526,9 @@ namespace Microsoft.CodeAnalysis.CSharp
                 case SyntaxKind.SubtractAssignmentExpression:
                     return BindCompoundAssignment((AssignmentExpressionSyntax)node, diagnostics);
 
+                case SyntaxKind.CoalesceAssignmentExpression:
+                    return BindNullCoalescingAssignment((AssignmentExpressionSyntax)node, diagnostics);
+
                 case SyntaxKind.AliasQualifiedName:
                 case SyntaxKind.PredefinedType:
                     return this.BindNamespaceOrType(node, diagnostics);

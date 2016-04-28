@@ -2438,6 +2438,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                 case SyntaxKind.OrAssignmentExpression:
                 case SyntaxKind.RightShiftAssignmentExpression:
                 case SyntaxKind.SubtractAssignmentExpression:
+                case SyntaxKind.CoalesceAssignmentExpression:
                     return BindValueKind.CompoundAssignment;
                 default:
                     return BindValueKind.RValue;
@@ -3128,22 +3129,41 @@ namespace Microsoft.CodeAnalysis.CSharp
             return null;
         }
 
-        private BoundExpression GenerateNullCoalescingBadBinaryOpsError(BinaryExpressionSyntax node, BoundExpression leftOperand, BoundExpression rightOperand, Conversion leftConversion, DiagnosticBag diagnostics)
+        private BoundExpression GenerateNullCoalescingBadBinaryOpsError(bool isAssignment, ExpressionSyntax node, BoundExpression leftOperand, BoundExpression rightOperand, Conversion leftConversion, DiagnosticBag diagnostics)
         {
-            Error(diagnostics, ErrorCode.ERR_BadBinaryOps, node, SyntaxFacts.GetText(node.OperatorToken.Kind()), leftOperand.Display, rightOperand.Display);
-            return new BoundNullCoalescingOperator(node, leftOperand, rightOperand,
-                leftConversion, CreateErrorType(), hasErrors: true);
+            var operatorKind = isAssignment ? SyntaxKind.QuestionQuestionEqualsToken : SyntaxKind.QuestionQuestionToken;
+            Error(diagnostics, ErrorCode.ERR_BadBinaryOps, node, SyntaxFacts.GetText(operatorKind), leftOperand.Display, rightOperand.Display);
+            if (isAssignment)
+            {
+                return new BoundNullCoalescingAssignmentOperator(node, leftOperand, rightOperand, leftConversion, CreateErrorType(), hasErrors: true);
+            }
+            else
+            {
+                return new BoundNullCoalescingOperator(node, leftOperand, rightOperand, leftConversion, CreateErrorType(), hasErrors: true);
+            }
         }
 
-        private BoundExpression BindNullCoalescingOperator(BinaryExpressionSyntax node, DiagnosticBag diagnostics)
+        private BoundExpression GenerateNullCoalescingAssignmentOrOperator(bool isAssignment, ExpressionSyntax node, BoundExpression leftOperand, BoundExpression rightOperand, Conversion leftConversion, TypeSymbol type, bool hasErrors = false)
         {
-            var leftOperand = BindValue(node.Left, diagnostics, BindValueKind.RValue);
-            var rightOperand = BindValue(node.Right, diagnostics, BindValueKind.RValue);
+            if (isAssignment)
+            {
+                return new BoundNullCoalescingAssignmentOperator(node, leftOperand, rightOperand, leftConversion, type, hasErrors);
+            }
+            else
+            {
+                return new BoundNullCoalescingOperator(node, leftOperand, rightOperand, Conversion.NoConversion, type, hasErrors);
+            }
+        }
+
+        private BoundExpression BindNullCoalescingOperatorOrAssignment(bool isAssignment, ExpressionSyntax node, ExpressionSyntax left, ExpressionSyntax right, DiagnosticBag diagnostics)
+        {
+            var leftOperand = BindValue(left, diagnostics, isAssignment ? BindValueKind.CompoundAssignment : BindValueKind.RValue);
+            var rightOperand = BindValue(right, diagnostics, BindValueKind.RValue);
 
             // If either operand is bad, bail out preventing more cascading errors
             if (leftOperand.HasAnyErrors || rightOperand.HasAnyErrors)
             {
-                return new BoundNullCoalescingOperator(node, leftOperand, rightOperand,
+                return GenerateNullCoalescingAssignmentOrOperator(isAssignment, node, leftOperand, rightOperand,
                     Conversion.NoConversion, CreateErrorType(), hasErrors: true);
             }
 
@@ -3172,14 +3192,14 @@ namespace Microsoft.CodeAnalysis.CSharp
 
             if (leftOperand.Kind == BoundKind.UnboundLambda || leftOperand.Kind == BoundKind.MethodGroup)
             {
-                return GenerateNullCoalescingBadBinaryOpsError(node, leftOperand, rightOperand, Conversion.NoConversion, diagnostics);
+                return GenerateNullCoalescingBadBinaryOpsError(isAssignment, node, leftOperand, rightOperand, Conversion.NoConversion, diagnostics);
             }
 
             // SPEC: Otherwise, if A exists and is not a nullable type or a reference type, a compile-time error occurs.
 
             if ((object)optLeftType != null && !optLeftType.IsReferenceType && !isLeftNullable)
             {
-                return GenerateNullCoalescingBadBinaryOpsError(node, leftOperand, rightOperand, Conversion.NoConversion, diagnostics);
+                return GenerateNullCoalescingBadBinaryOpsError(isAssignment, node, leftOperand, rightOperand, Conversion.NoConversion, diagnostics);
             }
 
             // SPEC:    If b is a dynamic expression, the result is dynamic. At runtime, a is first
@@ -3193,7 +3213,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             {
                 var leftConversion = Conversions.ClassifyConversionFromExpression(leftOperand, GetSpecialType(SpecialType.System_Object, diagnostics, node), ref useSiteDiagnostics);
                 diagnostics.Add(node, useSiteDiagnostics);
-                return new BoundNullCoalescingOperator(node, leftOperand, rightOperand,
+                return GenerateNullCoalescingAssignmentOrOperator(isAssignment, node, leftOperand, rightOperand,
                     leftConversion, optRightType);
             }
 
@@ -3210,7 +3230,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                     var leftConversion = Conversions.ClassifyConversionFromExpression(leftOperand, optLeftType0, ref useSiteDiagnostics);
                     diagnostics.Add(node, useSiteDiagnostics);
                     var convertedRightOperand = CreateConversion(rightOperand, rightConversion, optLeftType0, diagnostics);
-                    return new BoundNullCoalescingOperator(node, leftOperand, convertedRightOperand,
+                    return GenerateNullCoalescingAssignmentOrOperator(isAssignment, node, leftOperand, convertedRightOperand,
                         leftConversion, optLeftType0);
                 }
             }
@@ -3227,7 +3247,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                     var convertedRightOperand = CreateConversion(rightOperand, rightConversion, optLeftType, diagnostics);
                     var leftConversion = Conversion.Identity;
                     diagnostics.Add(node, useSiteDiagnostics);
-                    return new BoundNullCoalescingOperator(node, leftOperand, convertedRightOperand,
+                    return GenerateNullCoalescingAssignmentOrOperator(isAssignment, node, leftOperand, convertedRightOperand,
                         leftConversion, optLeftType);
                 }
             }
@@ -3298,13 +3318,23 @@ namespace Microsoft.CodeAnalysis.CSharp
                     }
 
                     diagnostics.Add(node, useSiteDiagnostics);
-                    return new BoundNullCoalescingOperator(node, leftOperand, rightOperand, leftConversion, optRightType);
+                    return GenerateNullCoalescingAssignmentOrOperator(isAssignment, node, leftOperand, rightOperand, leftConversion, optRightType);
                 }
             }
 
             // SPEC:    Otherwise, a and b are incompatible, and a compile-time error occurs.
             diagnostics.Add(node, useSiteDiagnostics);
-            return GenerateNullCoalescingBadBinaryOpsError(node, leftOperand, rightOperand, Conversion.NoConversion, diagnostics);
+            return GenerateNullCoalescingBadBinaryOpsError(isAssignment, node, leftOperand, rightOperand, Conversion.NoConversion, diagnostics);
+        }
+
+        private BoundExpression BindNullCoalescingOperator(BinaryExpressionSyntax node, DiagnosticBag diagnostics)
+        {
+            return BindNullCoalescingOperatorOrAssignment(false, node, node.Left, node.Right, diagnostics);
+        }
+
+        private BoundExpression BindNullCoalescingAssignment(AssignmentExpressionSyntax node, DiagnosticBag diagnostics)
+        {
+            return BindNullCoalescingOperatorOrAssignment(true, node, node.Left, node.Right, diagnostics);
         }
 
         /// <remarks>

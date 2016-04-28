@@ -313,6 +313,7 @@ namespace Microsoft.CodeAnalysis.CSharp.UnitTests
             TestAssignment(SyntaxKind.AmpersandEqualsToken);
             TestAssignment(SyntaxKind.BarEqualsToken);
             TestAssignment(SyntaxKind.CaretEqualsToken);
+            TestAssignment(SyntaxKind.QuestionQuestionEqualsToken);
         }
 
         private void TestMemberAccess(SyntaxKind kind)

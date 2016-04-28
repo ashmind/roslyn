@@ -592,6 +592,7 @@ namespace Microsoft.CodeAnalysis.CSharp.UnitTests
             TestPunctuation(SyntaxKind.MinusEqualsToken);
             TestPunctuation(SyntaxKind.CaretEqualsToken);
             TestPunctuation(SyntaxKind.PercentEqualsToken);
+            TestPunctuation(SyntaxKind.QuestionQuestionEqualsToken);
         }
 
         private void TestPunctuation(SyntaxKind kind)

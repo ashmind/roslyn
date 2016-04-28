@@ -42,6 +42,9 @@ namespace Microsoft.CodeAnalysis.CSharp
                 case BoundKind.CompoundAssignmentOperator:
                     return VisitCompoundAssignmentOperator((BoundCompoundAssignmentOperator)expression, used: false);
 
+                case BoundKind.NullCoalescingAssignmentOperator:
+                    return VisitNullCoalescingAssignmentOperator((BoundNullCoalescingAssignmentOperator)expression, used: false);
+
                 case BoundKind.Call:
                     if (_allowOmissionOfConditionalCalls)
                     {

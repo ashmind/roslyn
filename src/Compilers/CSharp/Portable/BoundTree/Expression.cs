@@ -1180,6 +1180,24 @@ namespace Microsoft.CodeAnalysis.CSharp
         }
     }
 
+    // TODO (coalesce-assignment)
+    internal partial class BoundNullCoalescingAssignmentOperator
+    {
+        protected override OperationKind ExpressionKind
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        public override void Accept(OperationVisitor visitor)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override TResult Accept<TArgument, TResult>(OperationVisitor<TArgument, TResult> visitor, TArgument argument) {
+            throw new NotImplementedException();
+        }
+    }
+
     internal partial class BoundAwaitExpression : IAwaitExpression
     {
         IOperation IAwaitExpression.AwaitedValue => this.Expression;

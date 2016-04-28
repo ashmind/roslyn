@@ -42,6 +42,8 @@ namespace Microsoft.CodeAnalysis.CSharp
                     return VisitAssignmentOperator(node as BoundAssignmentOperator, arg);
                 case BoundKind.NullCoalescingOperator:
                     return VisitNullCoalescingOperator(node as BoundNullCoalescingOperator, arg);
+                case BoundKind.NullCoalescingAssignmentOperator:
+                    return VisitNullCoalescingAssignmentOperator(node as BoundNullCoalescingAssignmentOperator, arg);
                 case BoundKind.ConditionalOperator:
                     return VisitConditionalOperator(node as BoundConditionalOperator, arg);
                 case BoundKind.ArrayAccess:

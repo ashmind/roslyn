@@ -1,0 +1,2 @@
+Microsoft.CodeAnalysis.CSharp.SyntaxKind.CoalesceAssignmentExpression = 8725 -> Microsoft.CodeAnalysis.CSharp.SyntaxKind
+Microsoft.CodeAnalysis.CSharp.SyntaxKind.QuestionQuestionEqualsToken = 8284 -> Microsoft.CodeAnalysis.CSharp.SyntaxKind

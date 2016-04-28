@@ -647,7 +647,7 @@ class C
         public void TestDynamicSimpleBinaryOps()
         {
             // Test binary * / % + - << >> < > <= >= != == ^ & | but not
-            // && || = *= /= %= += -= <<= >>= &= |= ^= ??
+            // && || = *= /= %= += -= <<= >>= &= |= ^= ?? ??=
             string source = @"
 class C
 {

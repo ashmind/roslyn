@@ -6021,6 +6021,37 @@ class C
 ");
         }
 
+        [Fact]
+        public void NullCoalescingAssignment() {
+            string source = @"
+class C
+{
+    dynamic d = null;
+    object o = null;
+
+    void M()
+    {
+        d ??= o;
+    }
+}";
+            CompileAndVerifyIL(source, "C.M", @"
+{
+  // Code size       23 (0x17)
+  .maxstack  3
+  IL_0000:  ldarg.0
+  IL_0001:  ldarg.0
+  IL_0002:  ldfld      ""dynamic C.d""
+  IL_0007:  dup
+  IL_0008:  brtrue.s   IL_0011
+  IL_000a:  pop
+  IL_000b:  ldarg.0
+  IL_000c:  ldfld      ""object C.o""
+  IL_0011:  stfld      ""dynamic C.d""
+  IL_0016:  ret
+}
+");
+        }
+
         #endregion
 
         #region Invoke, InvokeMember, InvokeConstructor

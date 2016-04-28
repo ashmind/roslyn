@@ -8172,6 +8172,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
                 case SyntaxKind.LeftShiftAssignmentExpression:
                 case SyntaxKind.RightShiftAssignmentExpression:
                 case SyntaxKind.CoalesceExpression:
+                case SyntaxKind.CoalesceAssignmentExpression:
                     return true;
                 default:
                     return false;
@@ -8193,6 +8194,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
                 case SyntaxKind.OrAssignmentExpression:
                 case SyntaxKind.LeftShiftAssignmentExpression:
                 case SyntaxKind.RightShiftAssignmentExpression:
+                case SyntaxKind.CoalesceAssignmentExpression:
                     return 1;
                 case SyntaxKind.CoalesceExpression:
                     return 2;
@@ -9272,6 +9274,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
                 case SyntaxKind.BarEqualsToken:
                 case SyntaxKind.LessThanLessThanEqualsToken:
                 case SyntaxKind.GreaterThanGreaterThanEqualsToken:
+                case SyntaxKind.QuestionQuestionEqualsToken:
                 case SyntaxKind.QuestionToken:
                 case SyntaxKind.ColonToken:
                 case SyntaxKind.BarBarToken:

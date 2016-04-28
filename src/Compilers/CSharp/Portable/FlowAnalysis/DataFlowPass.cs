@@ -1565,6 +1565,13 @@ namespace Microsoft.CodeAnalysis.CSharp
             return null;
         }
 
+        public override BoundNode VisitNullCoalescingAssignmentOperator(BoundNullCoalescingAssignmentOperator node)
+        {
+            base.VisitNullCoalescingAssignmentOperator(node);
+            Assign(node.Left, node.Right);
+            return null;
+        }
+
         public override BoundNode VisitAddressOfOperator(BoundAddressOfOperator node)
         {
             BoundExpression operand = node.Operand;

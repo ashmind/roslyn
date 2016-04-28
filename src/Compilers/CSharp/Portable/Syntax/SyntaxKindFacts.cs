@@ -620,6 +620,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                 case SyntaxKind.MultiplyAssignmentExpression:
                 case SyntaxKind.DivideAssignmentExpression:
                 case SyntaxKind.ModuloAssignmentExpression:
+                case SyntaxKind.CoalesceAssignmentExpression:
                 case SyntaxKind.SimpleAssignmentExpression:
                     return true;
                 default:
@@ -641,6 +642,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                 case SyntaxKind.AsteriskEqualsToken:
                 case SyntaxKind.SlashEqualsToken:
                 case SyntaxKind.PercentEqualsToken:
+                case SyntaxKind.QuestionQuestionEqualsToken:
                 case SyntaxKind.EqualsToken:
                     return true;
                 default:
@@ -672,6 +674,8 @@ namespace Microsoft.CodeAnalysis.CSharp
                     return SyntaxKind.DivideAssignmentExpression;
                 case SyntaxKind.PercentEqualsToken:
                     return SyntaxKind.ModuloAssignmentExpression;
+                case SyntaxKind.QuestionQuestionEqualsToken:
+                    return SyntaxKind.CoalesceAssignmentExpression;
                 case SyntaxKind.EqualsToken:
                     return SyntaxKind.SimpleAssignmentExpression;
                 default:
@@ -1308,6 +1312,8 @@ namespace Microsoft.CodeAnalysis.CSharp
                     return "^=";
                 case SyntaxKind.PercentEqualsToken:
                     return "%=";
+                case SyntaxKind.QuestionQuestionEqualsToken:
+                    return "??=";
 
                 // Keywords
                 case SyntaxKind.BoolKeyword:

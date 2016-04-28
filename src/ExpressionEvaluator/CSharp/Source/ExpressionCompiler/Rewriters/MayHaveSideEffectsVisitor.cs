@@ -45,6 +45,11 @@ namespace Microsoft.CodeAnalysis.CSharp.ExpressionEvaluator
             return this.SetMayHaveSideEffects();
         }
 
+        public override BoundNode VisitNullCoalescingAssignmentOperator(BoundNullCoalescingAssignmentOperator node)
+        {
+            return this.SetMayHaveSideEffects();
+        }
+
         public override BoundNode VisitEventAssignmentOperator(BoundEventAssignmentOperator node)
         {
             return this.SetMayHaveSideEffects();

@@ -72,6 +72,12 @@ namespace Microsoft.CodeAnalysis.CSharp.UnitTests.IncrementalParsing
             MakeAssignmentChange(SyntaxKind.SimpleAssignmentExpression, SyntaxKind.OrAssignmentExpression);
         }
 
+        [Fact]
+        public void AssignToCoalesce()
+        {
+            MakeAssignmentChange(SyntaxKind.SimpleAssignmentExpression, SyntaxKind.CoalesceAssignmentExpression);
+        }
+
         #region Helper Methods
         private static void MakeAssignmentChange(SyntaxKind oldStyle, SyntaxKind newStyle)
         {
@@ -124,6 +130,8 @@ namespace Microsoft.CodeAnalysis.CSharp.UnitTests.IncrementalParsing
                     return "<<=";
                 case SyntaxKind.RightShiftAssignmentExpression:
                     return ">>=";
+                case SyntaxKind.CoalesceAssignmentExpression:
+                    return "??=";
                 default:
                     throw new Exception("No operator found");
             }

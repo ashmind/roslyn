@@ -823,6 +823,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                 // operator's token.
                 Contract.ThrowIfTrue(previousToken.HasValue && previousToken.Value != operatorToken);
 
+                // TODO?: (coalesce-assignment)
                 if (binop.Kind() == SyntaxKind.CoalesceExpression)
                 {
                     return InferTypeInCoalesceExpression((BinaryExpressionSyntax)binop, expressionOpt, previousToken);

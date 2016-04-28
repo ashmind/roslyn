@@ -1484,26 +1484,37 @@ namespace Microsoft.CodeAnalysis.CSharp
 
         public override BoundNode VisitCompoundAssignmentOperator(BoundCompoundAssignmentOperator node)
         {
+            return VisitCompositeAssignmentInternal(node, node.Left, node.Right);
+        }
+
+        public override BoundNode VisitNullCoalescingAssignmentOperator(BoundNullCoalescingAssignmentOperator node)
+        {
+            // TODO (coalesce-assignment): should we mark whole thing as unreachable/noop if the right part is constant null?
+            return VisitCompositeAssignmentInternal(node, node.Left, node.Right);
+        }
+
+        private BoundNode VisitCompositeAssignmentInternal(BoundExpression node, BoundExpression left, BoundExpression right)
+        {
             // TODO: should events be handled specially too?
-            if (RegularPropertyAccess(node.Left))
+            if (RegularPropertyAccess(left))
             {
-                var left = (BoundPropertyAccess)node.Left;
-                var property = left.PropertySymbol;
+                var leftPropertyAccess = (BoundPropertyAccess)left;
+                var property = leftPropertyAccess.PropertySymbol;
                 var readMethod = property.GetOwnOrInheritedGetMethod() ?? property.SetMethod;
                 var writeMethod = property.GetOwnOrInheritedSetMethod() ?? property.GetMethod;
                 Debug.Assert(node.HasAnyErrors || (object)readMethod != (object)writeMethod);
-                VisitReceiverBeforeCall(left.ReceiverOpt, readMethod);
+                VisitReceiverBeforeCall(leftPropertyAccess.ReceiverOpt, readMethod);
                 if (_trackExceptions) NotePossibleException(node);
-                VisitReceiverAfterCall(left.ReceiverOpt, readMethod);
-                VisitRvalue(node.Right);
-                PropertySetter(node, left.ReceiverOpt, writeMethod);
+                VisitReceiverAfterCall(leftPropertyAccess.ReceiverOpt, readMethod);
+                VisitRvalue(right);
+                PropertySetter(node, leftPropertyAccess.ReceiverOpt, writeMethod);
                 if (_trackExceptions) NotePossibleException(node);
-                VisitReceiverAfterCall(left.ReceiverOpt, writeMethod);
+                VisitReceiverAfterCall(leftPropertyAccess.ReceiverOpt, writeMethod);
             }
             else
             {
-                VisitRvalue(node.Left);
-                VisitRvalue(node.Right);
+                VisitRvalue(left);
+                VisitRvalue(right);
                 if (_trackExceptions && node.HasExpressionSymbols()) NotePossibleException(node);
             }
 
